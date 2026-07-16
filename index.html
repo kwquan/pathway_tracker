@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pathways">
+<meta name="theme-color" content="#0E1015">
+<title>Pathways — Progress Tracker</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== HOME SCREEN ===== -->
+  <section id="screen-home" class="screen active">
+    <header class="home-header">
+      <p class="eyebrow">// active_pathways</p>
+      <h1 class="app-title">Pathways</h1>
+      <p class="app-sub">Three tracks. One tree of progress.</p>
+    </header>
+
+    <div class="path-grid" id="pathGrid"><!-- injected --></div>
+
+    <footer class="home-footer">
+      <p>Tap a node to open its tree. Progress saves on this device.</p>
+    </footer>
+  </section>
+
+  <!-- ===== PATHWAY DETAIL SCREEN ===== -->
+  <section id="screen-detail" class="screen">
+    <header class="detail-header" id="detailHeader">
+      <button class="back-btn" id="backBtn" aria-label="Back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Pathways</span>
+      </button>
+      <div class="detail-title-row">
+        <span class="detail-icon" id="detailIcon"></span>
+        <h1 class="detail-title" id="detailTitle"></h1>
+        <span class="stamp" id="detailStamp">COMPLETED</span>
+      </div>
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" id="detailProgressFill"></div></div>
+        <span class="progress-label" id="detailProgressLabel">0 / 0</span>
+      </div>
+    </header>
+
+    <div class="chains-wrap" id="chainsWrap"><!-- injected --></div>
+  </section>
+
+</div>
+
+<!-- ===== MODAL: schedule objective ===== -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-card">
+    <p class="modal-eyebrow" id="modalEyebrow">// schedule</p>
+    <h2 class="modal-title" id="modalTitle">Objective</h2>
+
+    <div class="modal-field-group" id="dateFields">
+      <div class="modal-field">
+        <label>Start date</label>
+        <input type="date" id="startDateInput" disabled>
+      </div>
+      <div class="modal-field">
+        <label>Target end date</label>
+        <input type="date" id="endDateInput">
+      </div>
+    </div>
+    <p class="modal-note" id="modalNote">This objective has no target date — just confirm to begin.</p>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
