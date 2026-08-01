@@ -54,7 +54,7 @@ const PATHWAYS = {
     ]
   },
   jp: {
-    key:'jp', name:'日本語', icon:'🇯🇵', accent:'var(--jp)', accentDim:'var(--jp-dim)',
+    key:'jp', name:'日本語', icon:'<svg viewBox="0 0 30 20" width="26" height="17.3" xmlns="http://www.w3.org/2000/svg" style="border-radius:3px; display:block;"><rect width="30" height="20" fill="#ffffff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>', accent:'var(--jp)', accentDim:'var(--jp-dim)',
     groups:[
       { id:'tango', title:'N2 単語', sequential:true, requiresDate:true,
         objectives: chapterRange(3, 12, 'jp_tg') },
@@ -358,7 +358,7 @@ function goHome(){
 function renderDetail(key){
   if(!key) return;
   const pathway = PATHWAYS[key];
-  document.getElementById('detail-icon').textContent = pathway.icon;
+  document.getElementById('detail-icon').innerHTML = pathway.icon;
   document.getElementById('detail-icon').style.background = pathway.accentDim;
   document.getElementById('detail-title-text').textContent = pathway.name;
   const complete = isPathwayComplete(pathway);
