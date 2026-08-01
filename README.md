@@ -1,44 +1,36 @@
 # Pathways — Progress Tracker
 
-A mobile-first web app for tracking your objectives across three pathways:
-📊 Data Science, 🤖 Reinforcement Learning, and 🇯🇵 日本語.
+A self-contained, mobile-first progress tracker for three learning pathways: Data Science, Reinforcement Learning, and 日本語. No build step, no backend — progress is saved in your browser's `localStorage`.
 
-No build step, no backend — pure HTML/CSS/JS. Progress is saved in your
-browser's `localStorage`, on-device.
+## What's new in this version
 
-## Deploy to GitHub Pages (2 minutes)
+- Renamed the home-screen section label to **"active pathways"**.
+- **Data Science**: all 6 objectives (4 books + Kaggle + a new **Explore AutoML** objective) are now independent/parallel — start any one, or several at once, in any order. Each still requires an end date.
+- **Reinforcement Learning**: the 5 **Papers** are now independent/parallel too. **Projects** stay a linked chain (Autolift → Humanoid Standup → Car Racing DQN → Inverted Pendulum). The three Autolift stages now use drone-specific icons (🛫 liftoff, 🚁 flight, 🛬 landing).
+- **日本語**: the 聴解 reference items (Todaii News, Japanese Podcast, Waku Waku Drama, NHK News Transcribe) are no longer purely static — tap one to open a counter popup (0, with a `+`/`−` to log sessions), and the running total shows beside the icon.
+- Fixed the third 本 title to **妖怪怪談**.
 
-1. Create a new GitHub repository (e.g. `pathways`).
-2. Upload all files in this folder to the repo root (`index.html`, `style.css`,
-   `app.js`, `manifest.json`, and the `icons/` folder), keeping the folder
-   structure intact.
-   - Easiest way: on GitHub, click **Add file → Upload files**, drag the whole
-     contents of this folder in, and commit.
-3. Go to **Settings → Pages** in your repo.
-4. Under **Build and deployment**, set **Source** to `Deploy from a branch`,
-   branch `main`, folder `/ (root)`. Save.
-5. Wait ~1 minute, then visit the URL GitHub gives you
-   (usually `https://<your-username>.github.io/<repo-name>/`).
+## Deploying to GitHub Pages
 
-## Add it to your iPhone Home Screen
+1. Create a new GitHub repository (or use an existing one).
+2. Upload these files to the repo root: `index.html`, `manifest.json`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`.
+3. In the repo, go to **Settings → Pages**, set **Source** to your default branch (e.g. `main`) and folder `/ (root)`, then save.
+4. GitHub will give you a URL like `https://<username>.github.io/<repo>/` — that's your app.
 
-1. Open the deployed URL in Safari on your iPhone.
+## Adding it to your iPhone home screen
+
+1. Open the GitHub Pages URL in **Safari** on your iPhone.
 2. Tap the **Share** icon → **Add to Home Screen**.
-3. It'll launch full-screen like a native app, with its own icon.
+3. It'll launch full-screen, app-style, using the icon and name from `manifest.json`.
 
-## Notes on the data
+## How progress is saved
 
-- Editing objectives: everything lives in `app.js` under the `PATHWAYS`
-  object — names, icons (emoji), and chain order. Edit and re-upload to
-  change anything.
-- The three books under 日本語 → 本 were transcribed from your photo as best
-  as legible: *君の不在の夜を歩く* (雛倉さりえ), *コンビニ人間* (村田沙耶香),
-  *殺戮に至る病* (我孫子武丸). Worth double-checking against the physical
-  covers and editing `app.js` if any title is off.
-- Progress is stored per-browser via `localStorage` — it won't sync across
-  devices. If you clear Safari's site data, progress resets.
-- Data Science and 日本語 objectives ask for a target end date when started.
-  Reinforcement Learning (and 日本語 → アニメ) skip the date step entirely,
-  per the spec.
-- 聴解 (Todaii News, Podcast, Waku Waku Drama, NHK transcribe) is shown as a
-  permanent, non-clickable reference list and doesn't count toward progress.
+Everything is stored locally in your browser via `localStorage` (key `pathways_tracker_state_v2`) — nothing is sent anywhere. This means progress is per-device/per-browser; it won't sync across your phone and laptop unless you use the same browser profile.
+
+## Editing objectives later
+
+All pathway/objective data lives in the `PATHWAYS` object near the top of the `<script>` block in `index.html`. Each group has:
+- `sequential: true` → objectives unlock one after another (chain).
+- `sequential: false` → all objectives are available immediately (parallel).
+- `requiresDate: true` → starting an objective opens the date picker; `false` → it starts immediately as "IN PROGRESS".
+- `type: 'counter'` → renders as a tap-to-log counter instead of a tracked chain (used for 聴解).

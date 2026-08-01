@@ -3,86 +3,961 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Pathways — Progress Tracker</title>
+
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pathways">
-<meta name="theme-color" content="#0E1015">
-<title>Pathways — Progress Tracker</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#0b0e14">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0a0d13;
+  --bg-grid: rgba(255,255,255,0.02);
+  --panel:#121722;
+  --panel2:#171d2b;
+  --border:#262f43;
+  --border-soft:#1c2333;
+  --text:#e9edf6;
+  --text-dim:#8b96b3;
+  --text-faint:#5b6580;
+
+  --blue:#5b9dff;
+  --green:#3ecf8e;
+  --red:#ff5c5c;
+  --purple:#b98cff;
+  --gold:#f2c14e;
+
+  --ds:#e8a33d;
+  --ds-dim:#4a3a20;
+  --rl:#2fb8a6;
+  --rl-dim:#1c3a37;
+  --jp:#e05a52;
+  --jp-dim:#3d2422;
+
+  --radius:14px;
+  --radius-sm:8px;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(91,157,255,0.05), transparent 40%),
+    radial-gradient(circle at 90% 20%, rgba(232,163,61,0.04), transparent 45%),
+    var(--bg);
+  color:var(--text);
+  font-family:'JetBrains Mono', monospace;
+  min-height:100vh;
+  min-height:100dvh;
+  overscroll-behavior-y: none;
+}
+h1,h2,h3,.display{
+  font-family:'Chakra Petch', sans-serif;
+}
+
+#app{
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  min-height:100dvh;
+  padding-bottom:48px;
+  position:relative;
+}
+
+/* ---------- Home ---------- */
+.home-header{
+  padding:28px 20px 8px;
+}
+.home-header .eyebrow{
+  font-size:11px;
+  letter-spacing:.18em;
+  color:var(--text-faint);
+  text-transform:uppercase;
+}
+.home-header h1{
+  font-size:30px;
+  font-weight:700;
+  letter-spacing:.01em;
+  margin:6px 0 2px;
+  background:linear-gradient(90deg, #e9edf6, #9fb0d6);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.home-header .sub{
+  font-size:12.5px;
+  color:var(--text-dim);
+  margin:0;
+}
+
+.section-label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:22px 20px 12px;
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:lowercase;
+  color:var(--text-faint);
+}
+.section-label::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:linear-gradient(90deg, var(--border), transparent);
+}
+
+.pathway-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:0 20px;
+}
+
+.pcard{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  background:linear-gradient(180deg, var(--panel2), var(--panel));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 16px;
+  cursor:pointer;
+  overflow:hidden;
+  transition:transform .12s ease, border-color .12s ease;
+}
+.pcard:active{ transform:scale(0.98); }
+.pcard::before{
+  content:"";
+  position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--accent);
+}
+.pcard .icon-wrap{
+  width:46px; height:46px;
+  border-radius:12px;
+  background:var(--accent-dim);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px;
+  flex-shrink:0;
+  border:1px solid var(--border);
+}
+.pcard .info{ flex:1; min-width:0; }
+.pcard .info h3{
+  margin:0 0 4px;
+  font-size:16.5px;
+  font-weight:600;
+  color:var(--text);
+  display:flex; align-items:center; gap:8px;
+}
+.pcard .info .stamp-mini{
+  font-size:8.5px;
+  letter-spacing:.08em;
+  color:var(--gold);
+  border:1px solid var(--gold);
+  border-radius:4px;
+  padding:1px 5px;
+  transform:rotate(-4deg);
+}
+.pcard .progress-row{
+  display:flex; align-items:center; gap:8px;
+}
+.pcard .bar{
+  flex:1; height:5px; border-radius:3px;
+  background:var(--border-soft);
+  overflow:hidden;
+}
+.pcard .bar-fill{
+  height:100%;
+  background:var(--accent);
+  border-radius:3px;
+  transition:width .3s ease;
+}
+.pcard .frac{
+  font-size:11px; color:var(--text-dim); white-space:nowrap;
+}
+.pcard .chev{ color:var(--text-faint); font-size:18px; }
+
+/* ---------- Pathway Detail ---------- */
+.detail-header{
+  position:sticky; top:0; z-index:5;
+  background:linear-gradient(180deg, var(--bg) 70%, transparent);
+  padding:16px 20px 14px;
+  backdrop-filter:blur(6px);
+}
+.back-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  color:var(--text-dim);
+  font-size:12px;
+  cursor:pointer;
+  background:none; border:none;
+  font-family:'JetBrains Mono', monospace;
+  padding:6px 0;
+}
+.detail-title-row{
+  display:flex; align-items:center; gap:12px;
+  margin-top:8px;
+  position:relative;
+}
+.detail-title-row .icon-wrap{
+  width:44px; height:44px; border-radius:12px;
+  background:var(--accent-dim);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px;
+  border:1px solid var(--border);
+  flex-shrink:0;
+}
+.detail-title-row h2{
+  margin:0; font-size:22px; font-weight:700; color:var(--text);
+  position:relative;
+}
+.completed-stamp{
+  position:absolute;
+  right:-6px; top:-14px;
+  font-size:10px; letter-spacing:.12em;
+  color:var(--gold);
+  border:1.5px solid var(--gold);
+  border-radius:5px;
+  padding:2px 7px;
+  transform:rotate(-8deg);
+  background:rgba(242,193,78,0.06);
+  font-family:'Chakra Petch', sans-serif;
+  font-weight:700;
+}
+.detail-progress{
+  margin-top:10px;
+  display:flex; align-items:center; gap:10px;
+}
+.detail-progress .bar{ flex:1; height:6px; border-radius:3px; background:var(--border-soft); overflow:hidden;}
+.detail-progress .bar-fill{ height:100%; background:var(--accent); }
+.detail-progress .frac{ font-size:12px; color:var(--text-dim); white-space:nowrap; }
+
+.groups{ padding:4px 20px 20px; }
+.group{ margin-top:26px; }
+.group-title{
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:14px;
+  display:flex; align-items:center; gap:8px;
+}
+.group-title .tag{
+  font-size:9px; color:var(--text-faint);
+  border:1px solid var(--border-soft);
+  border-radius:4px; padding:1px 6px;
+  letter-spacing:.06em; text-transform:none;
+}
+
+.chain{ position:relative; display:flex; flex-direction:column; gap:0; }
+.chain.linked .node-wrap:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  left:23px; top:100%;
+  width:2px; height:14px;
+  background:var(--border);
+}
+.node-wrap{ position:relative; padding-bottom:14px; }
+.grid-nonseq{
+  display:flex; flex-direction:column; gap:10px;
+}
+
+.node{
+  display:flex; align-items:flex-start; gap:12px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:12px 13px;
+  transition:border-color .15s ease, background .15s ease;
+}
+.node.available{ border-color:rgba(91,157,255,0.4); cursor:pointer; }
+.node.available:active{ transform:scale(0.99); }
+.node.inprogress{ border-color:rgba(62,207,142,0.35); }
+.node.late{ border-color:rgba(255,92,92,0.4); }
+.node.completed{ border-color:rgba(242,193,78,0.3); background:linear-gradient(180deg, rgba(242,193,78,0.05), var(--panel)); }
+.node.skipped{ border-color:rgba(185,140,255,0.3); }
+.node.locked{ opacity:.5; }
+
+.node .nicon{
+  width:34px; height:34px; border-radius:9px;
+  background:var(--panel2);
+  border:1px solid var(--border-soft);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0; margin-top:1px;
+}
+.node .nbody{ flex:1; min-width:0; }
+.node .nname{ font-size:13.5px; color:var(--text); line-height:1.35; font-weight:500; }
+.node .nstatus-row{
+  margin-top:6px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+}
+.status-pill{
+  font-size:10px; letter-spacing:.06em; font-weight:600;
+  padding:2px 7px; border-radius:5px;
+  display:inline-flex; align-items:center; gap:4px;
+}
+.status-pill.locked{ color:var(--text-faint); background:rgba(255,255,255,0.03); }
+.status-pill.available{ color:var(--blue); background:rgba(91,157,255,0.1); }
+.status-pill.inprogress{ color:var(--green); background:rgba(62,207,142,0.1); }
+.status-pill.late{ color:var(--red); background:rgba(255,92,92,0.12); }
+.status-pill.completed{ color:var(--gold); background:rgba(242,193,78,0.1); }
+.status-pill.skipped{ color:var(--purple); background:rgba(185,140,255,0.1); }
+.late-tag{ font-size:10px; color:var(--red); font-weight:600; }
+
+.node-actions{ margin-top:9px; display:flex; gap:8px; }
+.btn{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px; font-weight:600;
+  padding:6px 12px; border-radius:6px;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  cursor:pointer;
+  letter-spacing:.03em;
+}
+.btn.primary{ background:rgba(62,207,142,0.12); border-color:rgba(62,207,142,0.4); color:var(--green); }
+.btn.ghost{ background:rgba(185,140,255,0.08); border-color:rgba(185,140,255,0.3); color:var(--purple); }
+.btn:active{ transform:scale(0.96); }
+
+/* counter (聴解) items */
+.counter-node{
+  display:flex; align-items:center; gap:12px;
+  background:var(--panel);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-sm);
+  padding:11px 13px;
+  cursor:pointer;
+}
+.counter-node .nicon{
+  width:34px; height:34px; border-radius:9px;
+  background:var(--panel2); border:1px solid var(--border-soft);
+  display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;
+}
+.counter-node .cbody{ flex:1; }
+.counter-node .cname{ font-size:13px; color:var(--text); }
+.counter-node .ccount{
+  font-size:15px; font-weight:700; color:var(--text-dim);
+  font-family:'Chakra Petch', sans-serif;
+  display:flex; align-items:baseline; gap:3px;
+}
+.counter-node .ccount b{ color:var(--text); font-size:17px; }
+.counter-hint{ font-size:9.5px; color:var(--text-faint); margin-top:2px; }
+
+/* ---------- Modal ---------- */
+.overlay{
+  position:fixed; inset:0; background:rgba(4,6,10,0.72);
+  display:flex; align-items:flex-end; justify-content:center;
+  z-index:50; backdrop-filter:blur(2px);
+  opacity:0; pointer-events:none; transition:opacity .18s ease;
+}
+.overlay.open{ opacity:1; pointer-events:auto; }
+.modal{
+  width:100%; max-width:480px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-bottom:none;
+  border-radius:20px 20px 0 0;
+  padding:22px 22px calc(22px + env(safe-area-inset-bottom));
+  transform:translateY(30px);
+  transition:transform .2s ease;
+}
+.overlay.open .modal{ transform:translateY(0); }
+.modal h3{
+  margin:0 0 4px; font-size:17px; display:flex; align-items:center; gap:8px;
+}
+.modal .modal-sub{ font-size:11.5px; color:var(--text-dim); margin-bottom:18px; }
+.field{ margin-bottom:14px; }
+.field label{
+  display:block; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-faint); margin-bottom:6px;
+}
+.field input[type=date], .field .static-date{
+  width:100%; padding:11px 12px; border-radius:8px;
+  background:var(--panel); border:1px solid var(--border);
+  color:var(--text); font-family:'JetBrains Mono', monospace; font-size:13.5px;
+}
+.field .static-date{ color:var(--text-dim); }
+.modal-actions{ display:flex; gap:10px; margin-top:18px; }
+.modal-actions .btn{ flex:1; padding:12px; font-size:12.5px; text-align:center; }
+.btn.cancel{ background:var(--panel); }
+.btn.confirm{ background:var(--blue); border-color:var(--blue); color:#0a0d13; font-weight:700; }
+.btn.confirm:disabled{ opacity:.35; }
+
+/* counter modal */
+.counter-modal-body{ display:flex; align-items:center; justify-content:center; gap:22px; padding:18px 0 6px; }
+.counter-modal-body .count-display{
+  font-family:'Chakra Petch', sans-serif; font-size:44px; font-weight:700; min-width:70px; text-align:center;
+}
+.round-btn{
+  width:50px; height:50px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:700;
+  border:1px solid var(--border); background:var(--panel); color:var(--text);
+  cursor:pointer;
+}
+.round-btn.plus{ background:rgba(62,207,142,0.14); border-color:rgba(62,207,142,0.4); color:var(--green); }
+.round-btn.minus{ background:rgba(255,92,92,0.1); border-color:rgba(255,92,92,0.3); color:var(--red); }
+.round-btn:active{ transform:scale(0.92); }
+
+.hidden{ display:none !important; }
+
+::-webkit-scrollbar{ width:0; height:0; }
+</style>
 </head>
 <body>
 
 <div id="app">
+  <!-- HOME VIEW -->
+  <div id="view-home">
+    <div class="home-header">
+      <div class="eyebrow">progress tracker</div>
+      <h1>Pathways</h1>
+      <p class="sub">Data Science · Reinforcement Learning · 日本語</p>
+    </div>
+    <div class="section-label">active pathways</div>
+    <div class="pathway-list" id="pathway-list"></div>
+  </div>
 
-  <!-- ===== HOME SCREEN ===== -->
-  <section id="screen-home" class="screen active">
-    <header class="home-header">
-      <p class="eyebrow">// active_pathways</p>
-      <h1 class="app-title">Pathways</h1>
-      <p class="app-sub">Three tracks. One tree of progress.</p>
-    </header>
-
-    <div class="path-grid" id="pathGrid"><!-- injected --></div>
-
-    <footer class="home-footer">
-      <p>Tap a node to open its tree. Progress saves on this device.</p>
-    </footer>
-  </section>
-
-  <!-- ===== PATHWAY DETAIL SCREEN ===== -->
-  <section id="screen-detail" class="screen">
-    <header class="detail-header" id="detailHeader">
-      <button class="back-btn" id="backBtn" aria-label="Back">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>Pathways</span>
-      </button>
+  <!-- DETAIL VIEW -->
+  <div id="view-detail" class="hidden">
+    <div class="detail-header">
+      <button class="back-btn" onclick="goHome()">← back</button>
       <div class="detail-title-row">
-        <span class="detail-icon" id="detailIcon"></span>
-        <h1 class="detail-title" id="detailTitle"></h1>
-        <span class="stamp" id="detailStamp">COMPLETED</span>
+        <div class="icon-wrap" id="detail-icon"></div>
+        <h2 id="detail-title">
+          <span id="detail-title-text"></span>
+          <span class="completed-stamp hidden" id="detail-stamp">COMPLETED</span>
+        </h2>
       </div>
-      <div class="progress-row">
-        <div class="progress-track"><div class="progress-fill" id="detailProgressFill"></div></div>
-        <span class="progress-label" id="detailProgressLabel">0 / 0</span>
-      </div>
-    </header>
-
-    <div class="chains-wrap" id="chainsWrap"><!-- injected --></div>
-  </section>
-
-</div>
-
-<!-- ===== MODAL: schedule objective ===== -->
-<div id="modalOverlay" class="modal-overlay">
-  <div class="modal-card">
-    <p class="modal-eyebrow" id="modalEyebrow">// schedule</p>
-    <h2 class="modal-title" id="modalTitle">Objective</h2>
-
-    <div class="modal-field-group" id="dateFields">
-      <div class="modal-field">
-        <label>Start date</label>
-        <input type="date" id="startDateInput" disabled>
-      </div>
-      <div class="modal-field">
-        <label>Target end date</label>
-        <input type="date" id="endDateInput">
+      <div class="detail-progress">
+        <div class="bar"><div class="bar-fill" id="detail-bar"></div></div>
+        <div class="frac" id="detail-frac"></div>
       </div>
     </div>
-    <p class="modal-note" id="modalNote">This objective has no target date — just confirm to begin.</p>
+    <div class="groups" id="groups-container"></div>
+  </div>
+</div>
 
+<!-- Date Modal -->
+<div class="overlay" id="date-overlay">
+  <div class="modal">
+    <h3 id="date-modal-title">Start objective</h3>
+    <p class="modal-sub">Set a target end date to begin tracking this objective.</p>
+    <div class="field">
+      <label>Start date</label>
+      <div class="static-date" id="date-start-display"></div>
+    </div>
+    <div class="field">
+      <label>Target end date</label>
+      <input type="date" id="date-end-input">
+    </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" id="modalCancel">Cancel</button>
-      <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+      <button class="btn cancel" onclick="closeDateModal()">Cancel</button>
+      <button class="btn confirm" id="date-confirm-btn" disabled onclick="confirmDateStart()">Confirm</button>
     </div>
   </div>
 </div>
 
-<script src="app.js"></script>
+<!-- Counter Modal -->
+<div class="overlay" id="counter-overlay">
+  <div class="modal">
+    <h3 id="counter-modal-title">Log session</h3>
+    <p class="modal-sub" id="counter-modal-sub">Track how many you've completed.</p>
+    <div class="counter-modal-body">
+      <div class="round-btn minus" onclick="adjustCounter(-1)">−</div>
+      <div class="count-display" id="counter-display">0</div>
+      <div class="round-btn plus" onclick="adjustCounter(1)">+</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn confirm" style="flex:none; width:100%;" onclick="closeCounterModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA MODEL
+   ============================================================ */
+function chapterRange(from, to, prefix){
+  const out = [];
+  for(let n=from; n<=to; n++){
+    out.push({ id:`${prefix}${n}`, name:`Chapter ${n}`, icon:'📖' });
+  }
+  return out;
+}
+function bunpouPairs(){
+  const pairs = [[5,6],[7,8],[9,10],[11,12],[13,14],[15,16],[17,18],[19,20],[21,22],[23,24],[25,26]];
+  return pairs.map(([a,b],i)=>({ id:`jp_bp${i+1}`, name:`第${a},${b}課`, icon:'📝' }));
+}
+
+const PATHWAYS = {
+  ds: {
+    key:'ds', name:'Data Science', icon:'📊', accent:'var(--ds)', accentDim:'var(--ds-dim)',
+    groups:[
+      { id:'main', title:null, sequential:false, requiresDate:true,
+        objectives:[
+          { id:'ds1', name:'Fluent Python (2nd ed.)', icon:'🐍' },
+          { id:'ds2', name:'Effective Python (3rd ed.)', icon:'📘' },
+          { id:'ds3', name:'Effective Pandas 2', icon:'🐼' },
+          { id:'ds4', name:'High Performance Python (3rd ed.)', icon:'⚡' },
+          { id:'ds5', name:'Kaggle Playground Series [Aug]', icon:'🏆' },
+          { id:'ds6', name:'Explore AutoML', icon:'🤖' },
+        ]
+      }
+    ]
+  },
+  rl: {
+    key:'rl', name:'Reinforcement Learning', icon:'🎮', accent:'var(--rl)', accentDim:'var(--rl-dim)',
+    groups:[
+      { id:'papers', title:'Papers', sequential:false, requiresDate:false,
+        objectives:[
+          { id:'rl_p1', name:'REINFORCE', icon:'📄' },
+          { id:'rl_p2', name:'DQN', icon:'🧩' },
+          { id:'rl_p3', name:'A2C', icon:'🧠' },
+          { id:'rl_p4', name:'PPO', icon:'🎯' },
+          { id:'rl_p5', name:'DDPG', icon:'🔧' },
+        ]
+      },
+      { id:'projects', title:'Projects', sequential:true, requiresDate:false,
+        objectives:[
+          { id:'rl_pr1', name:'Autolift — Liftoff', icon:'🛫' },
+          { id:'rl_pr2', name:'Autolift — Flight', icon:'🚁' },
+          { id:'rl_pr3', name:'Autolift — Landing', icon:'🛬' },
+          { id:'rl_pr4', name:'Humanoid Standup', icon:'🤸' },
+          { id:'rl_pr5', name:'Car Racing DQN', icon:'🏎️' },
+          { id:'rl_pr6', name:'Inverted Pendulum REINFORCE', icon:'⚖️' },
+        ]
+      }
+    ]
+  },
+  jp: {
+    key:'jp', name:'日本語', icon:'🇯🇵', accent:'var(--jp)', accentDim:'var(--jp-dim)',
+    groups:[
+      { id:'tango', title:'N2 単語', sequential:true, requiresDate:true,
+        objectives: chapterRange(3, 12, 'jp_tg') },
+      { id:'bunpou', title:'N2 文法', sequential:true, requiresDate:true,
+        objectives: bunpouPairs() },
+      { id:'hon', title:'本', sequential:true, requiresDate:true,
+        objectives:[
+          { id:'jp_h1', name:'君の不在の夜を歩く（雛倉さりえ）', icon:'🌙' },
+          { id:'jp_h2', name:'コンビニ人間（村田沙耶香）', icon:'🏪' },
+          { id:'jp_h3', name:'妖怪怪談', icon:'👻' },
+        ]
+      },
+      { id:'anime', title:'アニメ', sequential:true, requiresDate:false,
+        objectives:[
+          { id:'jp_a1', name:'Witch Watch', icon:'🧙' },
+          { id:'jp_a2', name:'Medalist', icon:'🏅' },
+          { id:'jp_a3', name:'クレヨンしんちゃん — 野原ひろしの弁当', icon:'🍱' },
+        ]
+      },
+      { id:'choukai', title:'聴解', type:'counter',
+        objectives:[
+          { id:'jp_c1', name:'Todaii News', icon:'📰' },
+          { id:'jp_c2', name:'Japanese Podcast', icon:'🎙️' },
+          { id:'jp_c3', name:'Waku Waku Drama', icon:'📺' },
+          { id:'jp_c4', name:'NHK News Transcribe', icon:'✍️' },
+        ]
+      },
+    ]
+  }
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const STORAGE_KEY = 'pathways_tracker_state_v2';
+let state = { objectives:{}, counters:{} };
+
+function todayISO(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ /* ignore */ }
+  if(!state.objectives) state.objectives = {};
+  if(!state.counters) state.counters = {};
+  normalizeState();
+}
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function normalizeState(){
+  Object.values(PATHWAYS).forEach(pathway=>{
+    pathway.groups.forEach(group=>{
+      if(group.type === 'counter'){
+        group.objectives.forEach(o=>{
+          if(typeof state.counters[o.id] !== 'number') state.counters[o.id] = 0;
+        });
+        return;
+      }
+      group.objectives.forEach((o, idx)=>{
+        if(!state.objectives[o.id]){
+          let status = 'LOCKED';
+          if(!group.sequential) status = 'AVAILABLE';
+          else if(idx === 0) status = 'AVAILABLE';
+          state.objectives[o.id] = { status, startDate:null, endDate:null, completedLate:false };
+        } else if(!group.sequential && state.objectives[o.id].status === 'LOCKED'){
+          // non-sequential groups: nothing should remain locked
+          state.objectives[o.id].status = 'AVAILABLE';
+        }
+      });
+    });
+  });
+}
+
+/* ============================================================
+   STATUS / DISPLAY HELPERS
+   ============================================================ */
+function daysBetween(a, b){
+  const ms = new Date(b) - new Date(a);
+  return Math.round(ms / 86400000);
+}
+
+function getEffectiveStatus(objState, requiresDate){
+  if(objState.status === 'IN_PROGRESS' && requiresDate && objState.endDate){
+    if(todayISO() > objState.endDate) return 'LATE';
+  }
+  return objState.status;
+}
+
+function statusMeta(effStatus){
+  switch(effStatus){
+    case 'LOCKED': return { pill:'locked', label:'LOCKED', icon:'🔒' };
+    case 'AVAILABLE': return { pill:'available', label:'AVAILABLE', icon:'' };
+    case 'IN_PROGRESS': return { pill:'inprogress', label:'IN PROGRESS', icon:'⏳' };
+    case 'LATE': return { pill:'late', label:'LATE', icon:'⏳' };
+    case 'COMPLETED': return { pill:'completed', label:'COMPLETED', icon:'✓' };
+    case 'SKIPPED': return { pill:'skipped', label:'SKIPPED', icon:'⤼' };
+  }
+}
+
+/* ============================================================
+   PROGRESS CALC
+   ============================================================ */
+function pathwayProgress(pathway){
+  let total=0, done=0;
+  pathway.groups.forEach(group=>{
+    if(group.type === 'counter') return; // not tracked toward completion
+    group.objectives.forEach(o=>{
+      total++;
+      const st = state.objectives[o.id].status;
+      if(st === 'COMPLETED' || st === 'SKIPPED') done++;
+    });
+  });
+  return { done, total };
+}
+
+function isPathwayComplete(pathway){
+  const p = pathwayProgress(pathway);
+  return p.total > 0 && p.done === p.total;
+}
+
+/* ============================================================
+   UNLOCK LOGIC
+   ============================================================ */
+function findGroupAndIndex(objId){
+  for(const pathway of Object.values(PATHWAYS)){
+    for(const group of pathway.groups){
+      if(group.type === 'counter') continue;
+      const idx = group.objectives.findIndex(o=>o.id===objId);
+      if(idx !== -1) return { pathway, group, idx };
+    }
+  }
+  return null;
+}
+
+function unlockNext(objId){
+  const loc = findGroupAndIndex(objId);
+  if(!loc || !loc.group.sequential) return;
+  const next = loc.group.objectives[loc.idx+1];
+  if(next && state.objectives[next.id].status === 'LOCKED'){
+    state.objectives[next.id].status = 'AVAILABLE';
+  }
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+let pendingStartId = null;
+let currentPathwayKey = null;
+let counterModalId = null;
+
+function startObjectiveFlow(objId, requiresDate){
+  const objState = state.objectives[objId];
+  if(objState.status !== 'AVAILABLE') return;
+  if(requiresDate){
+    openDateModal(objId);
+  }else{
+    objState.status = 'IN_PROGRESS';
+    objState.startDate = todayISO();
+    objState.endDate = null;
+    saveState();
+    renderDetail(currentPathwayKey);
+  }
+}
+
+function openDateModal(objId){
+  pendingStartId = objId;
+  document.getElementById('date-start-display').textContent = formatDate(todayISO());
+  const input = document.getElementById('date-end-input');
+  input.value = '';
+  input.min = todayISO();
+  document.getElementById('date-confirm-btn').disabled = true;
+  const loc = findGroupAndIndex(objId);
+  const name = loc ? loc.group.objectives[loc.idx].name : '';
+  document.getElementById('date-modal-title').textContent = name;
+  document.getElementById('date-overlay').classList.add('open');
+}
+function closeDateModal(){
+  document.getElementById('date-overlay').classList.remove('open');
+  pendingStartId = null;
+}
+function confirmDateStart(){
+  const input = document.getElementById('date-end-input');
+  if(!input.value || !pendingStartId) return;
+  const objState = state.objectives[pendingStartId];
+  objState.status = 'IN_PROGRESS';
+  objState.startDate = todayISO();
+  objState.endDate = input.value;
+  saveState();
+  closeDateModal();
+  renderDetail(currentPathwayKey);
+}
+
+document.getElementById('date-end-input').addEventListener('input', (e)=>{
+  document.getElementById('date-confirm-btn').disabled = !e.target.value;
+});
+
+function completeObjective(objId){
+  const objState = state.objectives[objId];
+  const loc = findGroupAndIndex(objId);
+  const requiresDate = loc && loc.group.requiresDate;
+  let late = false;
+  if(requiresDate && objState.endDate && todayISO() > objState.endDate) late = true;
+  objState.status = 'COMPLETED';
+  objState.completedLate = late;
+  unlockNext(objId);
+  saveState();
+  renderDetail(currentPathwayKey);
+}
+
+function skipObjective(objId){
+  const objState = state.objectives[objId];
+  objState.status = 'SKIPPED';
+  unlockNext(objId);
+  saveState();
+  renderDetail(currentPathwayKey);
+}
+
+function openCounterModal(objId, name){
+  counterModalId = objId;
+  document.getElementById('counter-modal-title').textContent = name;
+  document.getElementById('counter-modal-sub').textContent = 'Log a completed session.';
+  document.getElementById('counter-display').textContent = state.counters[objId] || 0;
+  document.getElementById('counter-overlay').classList.add('open');
+}
+function closeCounterModal(){
+  document.getElementById('counter-overlay').classList.remove('open');
+  counterModalId = null;
+  renderDetail(currentPathwayKey);
+}
+function adjustCounter(delta){
+  if(!counterModalId) return;
+  const cur = state.counters[counterModalId] || 0;
+  const next = Math.max(0, cur + delta);
+  state.counters[counterModalId] = next;
+  document.getElementById('counter-display').textContent = next;
+  saveState();
+}
+
+/* ============================================================
+   DATE FORMAT
+   ============================================================ */
+function formatDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+/* ============================================================
+   RENDER: HOME
+   ============================================================ */
+function renderHome(){
+  const list = document.getElementById('pathway-list');
+  list.innerHTML = '';
+  Object.values(PATHWAYS).forEach(pathway=>{
+    const { done, total } = pathwayProgress(pathway);
+    const pct = total ? Math.round((done/total)*100) : 0;
+    const complete = isPathwayComplete(pathway);
+    const card = document.createElement('div');
+    card.className = 'pcard';
+    card.style.setProperty('--accent', pathway.accent);
+    card.style.setProperty('--accent-dim', pathway.accentDim);
+    card.onclick = ()=> openPathway(pathway.key);
+    card.innerHTML = `
+      <div class="icon-wrap">${pathway.icon}</div>
+      <div class="info">
+        <h3>${pathway.name}${complete ? '<span class="stamp-mini">DONE</span>' : ''}</h3>
+        <div class="progress-row">
+          <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="frac">${done}/${total}</div>
+        </div>
+      </div>
+      <div class="chev">›</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+/* ============================================================
+   RENDER: DETAIL
+   ============================================================ */
+function openPathway(key){
+  currentPathwayKey = key;
+  document.getElementById('view-home').classList.add('hidden');
+  document.getElementById('view-detail').classList.remove('hidden');
+  renderDetail(key);
+  window.scrollTo(0,0);
+}
+function goHome(){
+  currentPathwayKey = null;
+  document.getElementById('view-detail').classList.add('hidden');
+  document.getElementById('view-home').classList.remove('hidden');
+  renderHome();
+}
+
+function renderDetail(key){
+  if(!key) return;
+  const pathway = PATHWAYS[key];
+  document.getElementById('detail-icon').textContent = pathway.icon;
+  document.getElementById('detail-icon').style.background = pathway.accentDim;
+  document.getElementById('detail-title-text').textContent = pathway.name;
+  const complete = isPathwayComplete(pathway);
+  document.getElementById('detail-stamp').classList.toggle('hidden', !complete);
+
+  const { done, total } = pathwayProgress(pathway);
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('detail-bar').style.width = pct + '%';
+  document.getElementById('detail-bar').style.background = pathway.accent;
+  document.getElementById('detail-frac').textContent = `${done}/${total} completed`;
+
+  const container = document.getElementById('groups-container');
+  container.innerHTML = '';
+
+  pathway.groups.forEach(group=>{
+    const groupEl = document.createElement('div');
+    groupEl.className = 'group';
+
+    if(group.title){
+      const titleEl = document.createElement('div');
+      titleEl.className = 'group-title';
+      titleEl.style.color = pathway.accent;
+      let tag = '';
+      if(group.type === 'counter') tag = 'reference';
+      else if(!group.sequential) tag = 'parallel';
+      titleEl.innerHTML = `${group.title}${tag ? `<span class="tag">${tag}</span>` : ''}`;
+      groupEl.appendChild(titleEl);
+    }
+
+    if(group.type === 'counter'){
+      const wrap = document.createElement('div');
+      wrap.className = 'grid-nonseq';
+      group.objectives.forEach(o=>{
+        const count = state.counters[o.id] || 0;
+        const cn = document.createElement('div');
+        cn.className = 'counter-node';
+        cn.onclick = ()=> openCounterModal(o.id, o.name);
+        cn.innerHTML = `
+          <div class="nicon">${o.icon}</div>
+          <div class="cbody">
+            <div class="cname">${o.name}</div>
+            <div class="counter-hint">tap to log</div>
+          </div>
+          <div class="ccount"><b>${count}</b>×</div>
+        `;
+        wrap.appendChild(cn);
+      });
+      groupEl.appendChild(wrap);
+      container.appendChild(groupEl);
+      return;
+    }
+
+    const chain = document.createElement('div');
+    chain.className = group.sequential ? 'chain linked' : 'grid-nonseq';
+
+    group.objectives.forEach(o=>{
+      const objState = state.objectives[o.id];
+      const eff = getEffectiveStatus(objState, group.requiresDate);
+      const meta = statusMeta(eff);
+
+      const nodeWrap = document.createElement('div');
+      if(group.sequential) nodeWrap.className = 'node-wrap';
+
+      const node = document.createElement('div');
+      node.className = `node ${eff.toLowerCase().replace('_','')}`;
+
+      let statusRow = `<span class="status-pill ${meta.pill}">${meta.icon ? meta.icon+' ' : ''}${meta.label}</span>`;
+
+      if(eff === 'IN_PROGRESS' || eff === 'LATE'){
+        if(group.requiresDate && objState.endDate){
+          const d = daysBetween(todayISO(), objState.endDate);
+          if(eff === 'LATE'){
+            statusRow += `<span class="late-tag">${Math.abs(d)}d overdue</span>`;
+          }else{
+            statusRow += `<span class="late-tag" style="color:var(--text-dim)">${d}d left</span>`;
+          }
+        }
+      }
+      if(eff === 'COMPLETED' && objState.completedLate){
+        statusRow += `<span class="late-tag">[late]</span>`;
+      }
+
+      let actions = '';
+      if(eff === 'IN_PROGRESS' || eff === 'LATE'){
+        actions = `<div class="node-actions">
+          <button class="btn primary" onclick="completeObjective('${o.id}')">Complete</button>
+          <button class="btn ghost" onclick="skipObjective('${o.id}')">Skip</button>
+        </div>`;
+      }
+
+      node.innerHTML = `
+        <div class="nicon">${o.icon}</div>
+        <div class="nbody">
+          <div class="nname">${o.name}</div>
+          <div class="nstatus-row">${statusRow}</div>
+          ${actions}
+        </div>
+      `;
+
+      if(eff === 'AVAILABLE'){
+        node.onclick = ()=> startObjectiveFlow(o.id, group.requiresDate);
+      }
+
+      nodeWrap.appendChild(node);
+      chain.appendChild(nodeWrap);
+    });
+
+    groupEl.appendChild(chain);
+    container.appendChild(groupEl);
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+loadState();
+renderHome();
+</script>
 </body>
 </html>
