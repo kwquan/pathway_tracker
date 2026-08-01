@@ -1,4 +1,4 @@
-# Pathways — Progress Tracker
+# Trivium — Progress Tracker
 
 A self-contained, mobile-first progress tracker for three learning pathways: Data Science, Reinforcement Learning, and 日本語. No build step, no backend — progress is saved in your browser's `localStorage`.
 
