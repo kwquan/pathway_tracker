@@ -1,504 +1,478 @@
 /* ============================================================
-   PATHWAYS — app logic
+   DATA MODEL
    ============================================================ */
-
-const STORAGE_KEY = 'pathways_state_v1';
-
-/* ---------- DATA MODEL ----------
-   Each pathway has one or more "chains" (mini-paths). Objectives
-   within a chain unlock sequentially. A chain can override the
-   pathway's default "special" (no end-date) behaviour.
-------------------------------------------------------------- */
+function chapterRange(from, to, prefix){
+  const out = [];
+  for(let n=from; n<=to; n++){
+    out.push({ id:`${prefix}${n}`, name:`Chapter ${n}`, icon:'📖' });
+  }
+  return out;
+}
+function bunpouPairs(){
+  const pairs = [[5,6],[7,8],[9,10],[11,12],[13,14],[15,16],[17,18],[19,20],[21,22],[23,24],[25,26]];
+  return pairs.map(([a,b],i)=>({ id:`jp_bp${i+1}`, name:`第${a},${b}課`, icon:'📝' }));
+}
 
 const PATHWAYS = {
   ds: {
-    name: 'Data Science',
-    icon: '📊',
-    special: false,
-    chains: [
-      {
-        id: 'ds-main',
-        title: null,
-        objectives: [
-          { id: 'ds-1', name: 'Read Fluent Python (2nd Edition)', icon: '🐍' },
-          { id: 'ds-2', name: 'Read Effective Python (3rd Edition)', icon: '🐍' },
-          { id: 'ds-3', name: 'Read Effective Pandas 2', icon: '🐼' },
-          { id: 'ds-4', name: 'Read High Performance Python (3rd Edition)', icon: '⚡' },
-          { id: 'ds-5', name: 'Complete Kaggle Playground Series [Aug]', icon: '🏆' },
-        ],
-      },
-    ],
+    key:'ds', name:'Data Science', icon:'📊', accent:'var(--ds)', accentDim:'var(--ds-dim)',
+    groups:[
+      { id:'main', title:null, sequential:false, requiresDate:true,
+        objectives:[
+          { id:'ds1', name:'Fluent Python (2nd ed.)', icon:'🐍' },
+          { id:'ds2', name:'Effective Python (3rd ed.)', icon:'📘' },
+          { id:'ds3', name:'Effective Pandas 2', icon:'🐼' },
+          { id:'ds4', name:'High Performance Python (3rd ed.)', icon:'⚡' },
+          { id:'ds5', name:'Kaggle Playground Series [Aug]', icon:'🏆' },
+          { id:'ds6', name:'Explore AutoML', icon:'🤖' },
+        ]
+      }
+    ]
   },
-
   rl: {
-    name: 'Reinforcement Learning',
-    icon: '🤖',
-    special: true, // no end-date required anywhere in this pathway
-    chains: [
-      {
-        id: 'rl-papers',
-        title: 'Papers',
-        objectives: [
-          { id: 'rl-p1', name: 'REINFORCE', icon: '📄' },
-          { id: 'rl-p2', name: 'DQN', icon: '📄' },
-          { id: 'rl-p3', name: 'A2C', icon: '📄' },
-          { id: 'rl-p4', name: 'PPO', icon: '📄' },
-          { id: 'rl-p5', name: 'DDPG', icon: '📄' },
-        ],
+    key:'rl', name:'Reinforcement Learning', icon:'🎮', accent:'var(--rl)', accentDim:'var(--rl-dim)',
+    groups:[
+      { id:'papers', title:'Papers', sequential:false, requiresDate:false,
+        objectives:[
+          { id:'rl_p1', name:'REINFORCE', icon:'📄' },
+          { id:'rl_p2', name:'DQN', icon:'🧩' },
+          { id:'rl_p3', name:'A2C', icon:'🧠' },
+          { id:'rl_p4', name:'PPO', icon:'🎯' },
+          { id:'rl_p5', name:'DDPG', icon:'🔧' },
+        ]
       },
-      {
-        id: 'rl-projects',
-        title: 'Projects',
-        objectives: [
-          { id: 'rl-j1', name: 'Autolift (Liftoff)', icon: '🚀' },
-          { id: 'rl-j2', name: 'Autolift (Flight)', icon: '🛰️' },
-          { id: 'rl-j3', name: 'Autolift (Landing)', icon: '🪂' },
-          { id: 'rl-j4', name: 'Humanoid Standup', icon: '🤸' },
-          { id: 'rl-j5', name: 'Car Racing DQN', icon: '🏎️' },
-          { id: 'rl-j6', name: 'Inverted Pendulum REINFORCE', icon: '🎯' },
-        ],
-      },
-    ],
+      { id:'projects', title:'Projects', sequential:true, requiresDate:false,
+        objectives:[
+          { id:'rl_pr1', name:'Autolift — Liftoff', icon:'🛫' },
+          { id:'rl_pr2', name:'Autolift — Flight', icon:'🚁' },
+          { id:'rl_pr3', name:'Autolift — Landing', icon:'🛬' },
+          { id:'rl_pr4', name:'Humanoid Standup', icon:'🤸' },
+          { id:'rl_pr5', name:'Car Racing DQN', icon:'🏎️' },
+          { id:'rl_pr6', name:'Inverted Pendulum REINFORCE', icon:'⚖️' },
+        ]
+      }
+    ]
   },
-
   jp: {
-    name: '日本語',
-    icon: '🇯🇵',
-    special: false,
-    chains: [
-      {
-        id: 'jp-vocab',
-        title: 'N2 単語',
-        objectives: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => ({
-          id: `jp-vocab-${n}`, name: `Chapter ${n}`, icon: '🈶',
-        })),
+    key:'jp', name:'日本語', icon:'🇯🇵', accent:'var(--jp)', accentDim:'var(--jp-dim)',
+    groups:[
+      { id:'tango', title:'N2 単語', sequential:true, requiresDate:true,
+        objectives: chapterRange(3, 12, 'jp_tg') },
+      { id:'bunpou', title:'N2 文法', sequential:true, requiresDate:true,
+        objectives: bunpouPairs() },
+      { id:'hon', title:'本', sequential:true, requiresDate:true,
+        objectives:[
+          { id:'jp_h1', name:'君の不在の夜を歩く（雛倉さりえ）', icon:'🌙' },
+          { id:'jp_h2', name:'コンビニ人間（村田沙耶香）', icon:'🏪' },
+          { id:'jp_h3', name:'妖怪怪談', icon:'👻' },
+        ]
       },
-      {
-        id: 'jp-grammar',
-        title: 'N2 文法',
-        objectives: [
-          [5, 6], [7, 8], [9, 10], [11, 12], [13, 14],
-          [15, 16], [17, 18], [19, 20], [21, 22], [23, 24], [25, 26],
-        ].map(([a, b]) => ({
-          id: `jp-grammar-${a}-${b}`, name: `第${a},${b}課`, icon: '📝',
-        })),
+      { id:'anime', title:'アニメ', sequential:true, requiresDate:false,
+        objectives:[
+          { id:'jp_a1', name:'Witch Watch', icon:'🧙' },
+          { id:'jp_a2', name:'Medalist', icon:'🏅' },
+          { id:'jp_a3', name:'クレヨンしんちゃん — 野原ひろしの弁当', icon:'🍱' },
+        ]
       },
-      {
-        id: 'jp-books',
-        title: '本',
-        objectives: [
-          { id: 'jp-book-1', name: '君の不在の夜を歩く（雛倉さりえ）', icon: '📘' },
-          { id: 'jp-book-2', name: 'コンビニ人間（村田沙耶香）', icon: '📗' },
-          { id: 'jp-book-3', name: '殺戮に至る病（我孫子武丸）', icon: '📕' },
-        ],
+      { id:'choukai', title:'聴解', type:'counter',
+        objectives:[
+          { id:'jp_c1', name:'Todaii News', icon:'📰' },
+          { id:'jp_c2', name:'Japanese Podcast', icon:'🎙️' },
+          { id:'jp_c3', name:'Waku Waku Drama', icon:'📺' },
+          { id:'jp_c4', name:'NHK News Transcribe', icon:'✍️' },
+        ]
       },
-      {
-        id: 'jp-anime',
-        title: 'アニメ',
-        special: true, // override: no end date needed
-        objectives: [
-          { id: 'jp-anime-1', name: 'Witch Watch', icon: '📺' },
-          { id: 'jp-anime-2', name: 'Medalist', icon: '📺' },
-          { id: 'jp-anime-3', name: "The Style of Hiroshi Nohara's Lunch", icon: '🍱' },
-        ],
-      },
-    ],
-    // permanent, non-interactive, always-on objectives — not part of progress tracking
-    permanent: {
-      title: '聴解',
-      note: 'ongoing — not tracked toward completion',
-      objectives: [
-        { id: 'jp-listen-1', name: 'Todaii News', icon: '📰' },
-        { id: 'jp-listen-2', name: 'Japanese Podcast', icon: '🎙️' },
-        { id: 'jp-listen-3', name: 'Waku Waku Drama', icon: '📻' },
-        { id: 'jp-listen-4', name: 'NHK News Transcribe', icon: '🖊️' },
-      ],
-    },
-  },
+    ]
+  }
 };
 
-/* ---------- STATE ---------- */
+/* ============================================================
+   STATE
+   ============================================================ */
+const STORAGE_KEY = 'pathways_tracker_state_v2';
+let state = { objectives:{}, counters:{} };
 
-function loadState() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch (e) {
-    return {};
-  }
+function todayISO(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
 }
-function saveState() {
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ /* ignore */ }
+  if(!state.objectives) state.objectives = {};
+  if(!state.counters) state.counters = {};
+  normalizeState();
+}
+
+function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
-let state = loadState(); // objectiveId -> { status, startDate, endDate, completedDate }
 
-function todayISO() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
+function normalizeState(){
+  Object.values(PATHWAYS).forEach(pathway=>{
+    pathway.groups.forEach(group=>{
+      if(group.type === 'counter'){
+        group.objectives.forEach(o=>{
+          if(typeof state.counters[o.id] !== 'number') state.counters[o.id] = 0;
+        });
+        return;
+      }
+      group.objectives.forEach((o, idx)=>{
+        if(!state.objectives[o.id]){
+          let status = 'LOCKED';
+          if(!group.sequential) status = 'AVAILABLE';
+          else if(idx === 0) status = 'AVAILABLE';
+          state.objectives[o.id] = { status, startDate:null, endDate:null, completedLate:false };
+        } else if(!group.sequential && state.objectives[o.id].status === 'LOCKED'){
+          // non-sequential groups: nothing should remain locked
+          state.objectives[o.id].status = 'AVAILABLE';
+        }
+      });
+    });
+  });
 }
-function daysBetween(fromISO, toISO) {
-  const a = new Date(fromISO + 'T00:00:00');
-  const b = new Date(toISO + 'T00:00:00');
-  return Math.round((b - a) / 86400000);
+
+/* ============================================================
+   STATUS / DISPLAY HELPERS
+   ============================================================ */
+function daysBetween(a, b){
+  const ms = new Date(b) - new Date(a);
+  return Math.round(ms / 86400000);
 }
 
-/* Compute the *effective* status of an objective given chain position + saved state */
-function getObjectiveStatus(chain, index) {
-  const obj = chain.objectives[index];
-  const saved = state[obj.id];
-
-  if (saved && saved.status === 'completed') return 'completed';
-  if (saved && saved.status === 'skipped') return 'skipped';
-
-  if (saved && saved.status === 'in-progress') {
-    if (saved.endDate) {
-      const remaining = daysBetween(todayISO(), saved.endDate);
-      if (remaining < 0) return 'late';
-    }
-    return 'in-progress';
+function getEffectiveStatus(objState, requiresDate){
+  if(objState.status === 'IN_PROGRESS' && requiresDate && objState.endDate){
+    if(todayISO() > objState.endDate) return 'LATE';
   }
-
-  // not started yet — is it unlocked?
-  if (index === 0) return 'available';
-  const prevStatus = getObjectiveStatus(chain, index - 1);
-  if (prevStatus === 'completed' || prevStatus === 'skipped') return 'available';
-  return 'locked';
+  return objState.status;
 }
 
-/* ---------- PROGRESS ---------- */
+function statusMeta(effStatus){
+  switch(effStatus){
+    case 'LOCKED': return { pill:'locked', label:'LOCKED', icon:'🔒' };
+    case 'AVAILABLE': return { pill:'available', label:'AVAILABLE', icon:'' };
+    case 'IN_PROGRESS': return { pill:'inprogress', label:'IN PROGRESS', icon:'⏳' };
+    case 'LATE': return { pill:'late', label:'LATE', icon:'⏳' };
+    case 'COMPLETED': return { pill:'completed', label:'COMPLETED', icon:'✓' };
+    case 'SKIPPED': return { pill:'skipped', label:'SKIPPED', icon:'⤼' };
+  }
+}
 
-function pathwayObjectiveList(pathway) {
-  // flattened list of all trackable (non-permanent) objectives
-  const list = [];
-  pathway.chains.forEach(chain => {
-    chain.objectives.forEach((obj, i) => list.push({ chain, obj, i }));
+/* ============================================================
+   PROGRESS CALC
+   ============================================================ */
+function pathwayProgress(pathway){
+  let total=0, done=0;
+  pathway.groups.forEach(group=>{
+    if(group.type === 'counter') return; // not tracked toward completion
+    group.objectives.forEach(o=>{
+      total++;
+      const st = state.objectives[o.id].status;
+      if(st === 'COMPLETED' || st === 'SKIPPED') done++;
+    });
   });
-  return list;
+  return { done, total };
 }
 
-function pathwayProgress(pathway) {
-  const list = pathwayObjectiveList(pathway);
-  let completed = 0;
-  list.forEach(({ chain, i }) => {
-    if (getObjectiveStatus(chain, i) === 'completed') completed++;
-  });
-  return { completed, total: list.length };
+function isPathwayComplete(pathway){
+  const p = pathwayProgress(pathway);
+  return p.total > 0 && p.done === p.total;
 }
 
-function pathwayIsComplete(pathway) {
-  const list = pathwayObjectiveList(pathway);
-  return list.every(({ chain, i }) => {
-    const s = getObjectiveStatus(chain, i);
-    return s === 'completed' || s === 'skipped';
-  });
+/* ============================================================
+   UNLOCK LOGIC
+   ============================================================ */
+function findGroupAndIndex(objId){
+  for(const pathway of Object.values(PATHWAYS)){
+    for(const group of pathway.groups){
+      if(group.type === 'counter') continue;
+      const idx = group.objectives.findIndex(o=>o.id===objId);
+      if(idx !== -1) return { pathway, group, idx };
+    }
+  }
+  return null;
 }
 
-function chainProgress(chain) {
-  let completed = 0;
-  chain.objectives.forEach((obj, i) => {
-    if (getObjectiveStatus(chain, i) === 'completed') completed++;
-  });
-  return { completed, total: chain.objectives.length };
+function unlockNext(objId){
+  const loc = findGroupAndIndex(objId);
+  if(!loc || !loc.group.sequential) return;
+  const next = loc.group.objectives[loc.idx+1];
+  if(next && state.objectives[next.id].status === 'LOCKED'){
+    state.objectives[next.id].status = 'AVAILABLE';
+  }
 }
 
-function chainIsComplete(chain) {
-  return chain.objectives.every((obj, i) => {
-    const s = getObjectiveStatus(chain, i);
-    return s === 'completed' || s === 'skipped';
-  });
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+let pendingStartId = null;
+let currentPathwayKey = null;
+let counterModalId = null;
+
+function startObjectiveFlow(objId, requiresDate){
+  const objState = state.objectives[objId];
+  if(objState.status !== 'AVAILABLE') return;
+  if(requiresDate){
+    openDateModal(objId);
+  }else{
+    objState.status = 'IN_PROGRESS';
+    objState.startDate = todayISO();
+    objState.endDate = null;
+    saveState();
+    renderDetail(currentPathwayKey);
+  }
 }
 
-/* ---------- RENDER: HOME ---------- */
+function openDateModal(objId){
+  pendingStartId = objId;
+  document.getElementById('date-start-display').textContent = formatDate(todayISO());
+  const input = document.getElementById('date-end-input');
+  input.value = '';
+  input.min = todayISO();
+  document.getElementById('date-confirm-btn').disabled = true;
+  const loc = findGroupAndIndex(objId);
+  const name = loc ? loc.group.objectives[loc.idx].name : '';
+  document.getElementById('date-modal-title').textContent = name;
+  document.getElementById('date-overlay').classList.add('open');
+}
+function closeDateModal(){
+  document.getElementById('date-overlay').classList.remove('open');
+  pendingStartId = null;
+}
+function confirmDateStart(){
+  const input = document.getElementById('date-end-input');
+  if(!input.value || !pendingStartId) return;
+  const objState = state.objectives[pendingStartId];
+  objState.status = 'IN_PROGRESS';
+  objState.startDate = todayISO();
+  objState.endDate = input.value;
+  saveState();
+  closeDateModal();
+  renderDetail(currentPathwayKey);
+}
 
-const pathGrid = document.getElementById('pathGrid');
+document.getElementById('date-end-input').addEventListener('input', (e)=>{
+  document.getElementById('date-confirm-btn').disabled = !e.target.value;
+});
 
-function renderHome() {
-  pathGrid.innerHTML = '';
-  Object.entries(PATHWAYS).forEach(([key, pathway]) => {
-    const { completed, total } = pathwayProgress(pathway);
-    const pct = total ? Math.round((completed / total) * 100) : 0;
-    const complete = pathwayIsComplete(pathway);
+function completeObjective(objId){
+  const objState = state.objectives[objId];
+  const loc = findGroupAndIndex(objId);
+  const requiresDate = loc && loc.group.requiresDate;
+  let late = false;
+  if(requiresDate && objState.endDate && todayISO() > objState.endDate) late = true;
+  objState.status = 'COMPLETED';
+  objState.completedLate = late;
+  unlockNext(objId);
+  saveState();
+  renderDetail(currentPathwayKey);
+}
 
+function skipObjective(objId){
+  const objState = state.objectives[objId];
+  objState.status = 'SKIPPED';
+  unlockNext(objId);
+  saveState();
+  renderDetail(currentPathwayKey);
+}
+
+function openCounterModal(objId, name){
+  counterModalId = objId;
+  document.getElementById('counter-modal-title').textContent = name;
+  document.getElementById('counter-modal-sub').textContent = 'Log a completed session.';
+  document.getElementById('counter-display').textContent = state.counters[objId] || 0;
+  document.getElementById('counter-overlay').classList.add('open');
+}
+function closeCounterModal(){
+  document.getElementById('counter-overlay').classList.remove('open');
+  counterModalId = null;
+  renderDetail(currentPathwayKey);
+}
+function adjustCounter(delta){
+  if(!counterModalId) return;
+  const cur = state.counters[counterModalId] || 0;
+  const next = Math.max(0, cur + delta);
+  state.counters[counterModalId] = next;
+  document.getElementById('counter-display').textContent = next;
+  saveState();
+}
+
+/* ============================================================
+   DATE FORMAT
+   ============================================================ */
+function formatDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+/* ============================================================
+   RENDER: HOME
+   ============================================================ */
+function renderHome(){
+  const list = document.getElementById('pathway-list');
+  list.innerHTML = '';
+  Object.values(PATHWAYS).forEach(pathway=>{
+    const { done, total } = pathwayProgress(pathway);
+    const pct = total ? Math.round((done/total)*100) : 0;
+    const complete = isPathwayComplete(pathway);
     const card = document.createElement('div');
-    card.className = `path-card ${key}`;
+    card.className = 'pcard';
+    card.style.setProperty('--accent', pathway.accent);
+    card.style.setProperty('--accent-dim', pathway.accentDim);
+    card.onclick = ()=> openPathway(pathway.key);
     card.innerHTML = `
-      <div class="path-icon">${pathway.icon}</div>
-      <div class="path-info">
-        <div class="path-name-row">
-          <p class="path-name">${pathway.name}</p>
-          ${complete ? '<span class="mini-stamp">DONE</span>' : ''}
-        </div>
-        <div class="path-progress-line">
-          <div class="mini-track"><div class="mini-fill" style="width:${pct}%"></div></div>
-          <span class="mini-count">${completed}/${total}</span>
+      <div class="icon-wrap">${pathway.icon}</div>
+      <div class="info">
+        <h3>${pathway.name}${complete ? '<span class="stamp-mini">DONE</span>' : ''}</h3>
+        <div class="progress-row">
+          <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="frac">${done}/${total}</div>
         </div>
       </div>
-      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="chev">›</div>
     `;
-    card.addEventListener('click', () => openPathway(key));
-    pathGrid.appendChild(card);
+    list.appendChild(card);
   });
 }
 
-/* ---------- RENDER: DETAIL ---------- */
-
-let currentPathwayKey = null;
-
-const screenHome = document.getElementById('screen-home');
-const screenDetail = document.getElementById('screen-detail');
-const detailIcon = document.getElementById('detailIcon');
-const detailTitle = document.getElementById('detailTitle');
-const detailStamp = document.getElementById('detailStamp');
-const detailProgressFill = document.getElementById('detailProgressFill');
-const detailProgressLabel = document.getElementById('detailProgressLabel');
-const chainsWrap = document.getElementById('chainsWrap');
-
-function openPathway(key) {
+/* ============================================================
+   RENDER: DETAIL
+   ============================================================ */
+function openPathway(key){
   currentPathwayKey = key;
-  renderDetail();
-  screenHome.classList.remove('active');
-  screenDetail.classList.add('active');
-  window.scrollTo(0, 0);
+  document.getElementById('view-home').classList.add('hidden');
+  document.getElementById('view-detail').classList.remove('hidden');
+  renderDetail(key);
+  window.scrollTo(0,0);
 }
-function closeDetail() {
-  screenDetail.classList.remove('active');
-  screenHome.classList.add('active');
+function goHome(){
+  currentPathwayKey = null;
+  document.getElementById('view-detail').classList.add('hidden');
+  document.getElementById('view-home').classList.remove('hidden');
   renderHome();
 }
-document.getElementById('backBtn').addEventListener('click', closeDetail);
 
-function statusLabel(status) {
-  return {
-    locked: 'LOCKED',
-    available: 'AVAILABLE',
-    'in-progress': 'IN PROGRESS',
-    late: 'LATE',
-    completed: 'COMPLETED',
-    skipped: 'SKIPPED',
-  }[status];
-}
+function renderDetail(key){
+  if(!key) return;
+  const pathway = PATHWAYS[key];
+  document.getElementById('detail-icon').textContent = pathway.icon;
+  document.getElementById('detail-icon').style.background = pathway.accentDim;
+  document.getElementById('detail-title-text').textContent = pathway.name;
+  const complete = isPathwayComplete(pathway);
+  document.getElementById('detail-stamp').classList.toggle('hidden', !complete);
 
-function renderDetail() {
-  const pathway = PATHWAYS[currentPathwayKey];
-  const { completed, total } = pathwayProgress(pathway);
-  const pct = total ? Math.round((completed / total) * 100) : 0;
+  const { done, total } = pathwayProgress(pathway);
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('detail-bar').style.width = pct + '%';
+  document.getElementById('detail-bar').style.background = pathway.accent;
+  document.getElementById('detail-frac').textContent = `${done}/${total} completed`;
 
-  detailIcon.textContent = pathway.icon;
-  detailTitle.textContent = pathway.name;
-  detailStamp.classList.toggle('show', pathwayIsComplete(pathway));
-  detailProgressFill.style.width = pct + '%';
-  detailProgressLabel.textContent = `${completed} / ${total} completed`;
+  const container = document.getElementById('groups-container');
+  container.innerHTML = '';
 
-  chainsWrap.innerHTML = '';
+  pathway.groups.forEach(group=>{
+    const groupEl = document.createElement('div');
+    groupEl.className = 'group';
 
-  pathway.chains.forEach(chain => {
-    const block = document.createElement('div');
-    block.className = 'chain-block';
-
-    let headerHtml = '';
-    if (chain.title) {
-      const cp = chainProgress(chain);
-      const done = chainIsComplete(chain);
-      headerHtml = `
-        <div class="chain-title-row">
-          <p class="chain-title" style="margin-bottom:0;">${chain.title} — ${cp.completed}/${cp.total}</p>
-          ${done ? '<span class="chain-stamp">COMPLETED</span>' : ''}
-        </div>`;
+    if(group.title){
+      const titleEl = document.createElement('div');
+      titleEl.className = 'group-title';
+      titleEl.style.color = pathway.accent;
+      let tag = '';
+      if(group.type === 'counter') tag = 'reference';
+      else if(!group.sequential) tag = 'parallel';
+      titleEl.innerHTML = `${group.title}${tag ? `<span class="tag">${tag}</span>` : ''}`;
+      groupEl.appendChild(titleEl);
     }
-    block.innerHTML = headerHtml;
 
-    const list = document.createElement('div');
-    list.className = 'node-list';
-    chain.objectives.forEach((obj, i) => {
-      list.appendChild(renderNode(pathway, chain, obj, i));
-    });
-    block.appendChild(list);
-    chainsWrap.appendChild(block);
-  });
-
-  // permanent section (e.g. 聴解)
-  if (pathway.permanent) {
-    const block = document.createElement('div');
-    block.className = 'chain-block';
-    block.innerHTML = `<p class="chain-title">${pathway.permanent.title}</p>
-      <p class="permanent-note">${pathway.permanent.note}</p>`;
-    const list = document.createElement('div');
-    list.className = 'node-list';
-    pathway.permanent.objectives.forEach(obj => {
-      const node = document.createElement('div');
-      node.className = 'node';
-      node.dataset.status = 'permanent';
-      node.innerHTML = `
-        <div class="node-rail"><div class="node-dot" style="background:var(--text-faint); box-shadow:none;"></div></div>
-        <div class="node-card">
-          <div class="node-top">
-            <span class="node-icon">${obj.icon}</span>
-            <span class="node-name">${obj.name}</span>
+    if(group.type === 'counter'){
+      const wrap = document.createElement('div');
+      wrap.className = 'grid-nonseq';
+      group.objectives.forEach(o=>{
+        const count = state.counters[o.id] || 0;
+        const cn = document.createElement('div');
+        cn.className = 'counter-node';
+        cn.onclick = ()=> openCounterModal(o.id, o.name);
+        cn.innerHTML = `
+          <div class="nicon">${o.icon}</div>
+          <div class="cbody">
+            <div class="cname">${o.name}</div>
+            <div class="counter-hint">tap to log</div>
           </div>
-        </div>`;
-      list.appendChild(node);
-    });
-    block.appendChild(list);
-    chainsWrap.appendChild(block);
-  }
-}
-
-function renderNode(pathway, chain, obj, index) {
-  const status = getObjectiveStatus(chain, index);
-  const saved = state[obj.id];
-  const isSpecial = chain.special !== undefined ? chain.special : pathway.special;
-
-  const node = document.createElement('div');
-  node.className = 'node';
-  node.dataset.status = status;
-
-  let statusRow = `<span class="status-tag ${status}">${statusLabel(status)}</span>`;
-  let datesRow = '';
-  let actionsRow = '';
-
-  if (status === 'in-progress' || status === 'late') {
-    if (saved.endDate) {
-      const remaining = daysBetween(todayISO(), saved.endDate);
-      const hourglass = status === 'late' ? '⌛' : '⏳';
-      const remText = status === 'late'
-        ? `${Math.abs(remaining)}d overdue`
-        : (remaining === 0 ? 'due today' : `${remaining}d left`);
-      statusRow = `<span class="status-tag ${status}">${hourglass} ${statusLabel(status)}</span><span class="node-dates">${remText}</span>`;
-      datesRow = `<div class="node-dates">${saved.startDate} → ${saved.endDate}</div>`;
-    } else {
-      statusRow = `<span class="status-tag in-progress">⏳ IN PROGRESS</span>`;
-      datesRow = `<div class="node-dates">started ${saved.startDate}</div>`;
+          <div class="ccount"><b>${count}</b>×</div>
+        `;
+        wrap.appendChild(cn);
+      });
+      groupEl.appendChild(wrap);
+      container.appendChild(groupEl);
+      return;
     }
-    actionsRow = `
-      <div class="node-actions">
-        <button class="btn btn-complete" data-action="complete" data-id="${obj.id}">Complete</button>
-        <button class="btn btn-skip" data-action="skip" data-id="${obj.id}">Skip</button>
-      </div>`;
-  }
 
-  if (status === 'completed') {
-    const late = saved.endDate && saved.completedDate && daysBetween(saved.endDate, saved.completedDate) > 0;
-    statusRow = `<span class="status-tag completed">✓ COMPLETED</span>${late ? '<span class="status-tag late-suffix">[late]</span>' : ''}`;
-    datesRow = `<div class="node-dates">${saved.startDate || ''}${saved.endDate ? ' → ' + saved.endDate : ''}${saved.completedDate ? ' · done ' + saved.completedDate : ''}</div>`;
-  }
+    const chain = document.createElement('div');
+    chain.className = group.sequential ? 'chain linked' : 'grid-nonseq';
 
-  if (status === 'skipped') {
-    statusRow = `<span class="status-tag skipped">SKIPPED</span>`;
-    datesRow = saved && saved.startDate ? `<div class="node-dates">${saved.startDate}</div>` : '';
-  }
+    group.objectives.forEach(o=>{
+      const objState = state.objectives[o.id];
+      const eff = getEffectiveStatus(objState, group.requiresDate);
+      const meta = statusMeta(eff);
 
-  node.innerHTML = `
-    <div class="node-rail"><div class="node-dot"></div></div>
-    <div class="node-card">
-      <div class="node-top">
-        <span class="node-icon">${obj.icon}</span>
-        <span class="node-name">${obj.name}</span>
-      </div>
-      <div class="node-status-row">${statusRow}</div>
-      ${datesRow}
-      ${actionsRow}
-    </div>
-  `;
+      const nodeWrap = document.createElement('div');
+      if(group.sequential) nodeWrap.className = 'node-wrap';
 
-  if (status === 'available') {
-    node.querySelector('.node-card').addEventListener('click', () => openScheduleModal(obj, isSpecial));
-  }
+      const node = document.createElement('div');
+      node.className = `node ${eff.toLowerCase().replace('_','')}`;
 
-  node.querySelectorAll('[data-action]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const action = btn.dataset.action;
-      if (action === 'complete') completeObjective(obj.id);
-      if (action === 'skip') skipObjective(obj.id);
+      let statusRow = `<span class="status-pill ${meta.pill}">${meta.icon ? meta.icon+' ' : ''}${meta.label}</span>`;
+
+      if(eff === 'IN_PROGRESS' || eff === 'LATE'){
+        if(group.requiresDate && objState.endDate){
+          const d = daysBetween(todayISO(), objState.endDate);
+          if(eff === 'LATE'){
+            statusRow += `<span class="late-tag">${Math.abs(d)}d overdue</span>`;
+          }else{
+            statusRow += `<span class="late-tag" style="color:var(--text-dim)">${d}d left</span>`;
+          }
+        }
+      }
+      if(eff === 'COMPLETED' && objState.completedLate){
+        statusRow += `<span class="late-tag">[late]</span>`;
+      }
+
+      let actions = '';
+      if(eff === 'IN_PROGRESS' || eff === 'LATE'){
+        actions = `<div class="node-actions">
+          <button class="btn primary" onclick="completeObjective('${o.id}')">Complete</button>
+          <button class="btn ghost" onclick="skipObjective('${o.id}')">Skip</button>
+        </div>`;
+      }
+
+      node.innerHTML = `
+        <div class="nicon">${o.icon}</div>
+        <div class="nbody">
+          <div class="nname">${o.name}</div>
+          <div class="nstatus-row">${statusRow}</div>
+          ${actions}
+        </div>
+      `;
+
+      if(eff === 'AVAILABLE'){
+        node.onclick = ()=> startObjectiveFlow(o.id, group.requiresDate);
+      }
+
+      nodeWrap.appendChild(node);
+      chain.appendChild(nodeWrap);
     });
+
+    groupEl.appendChild(chain);
+    container.appendChild(groupEl);
   });
-
-  return node;
 }
 
-/* ---------- ACTIONS ---------- */
-
-function completeObjective(id) {
-  const s = state[id] || {};
-  s.status = 'completed';
-  s.completedDate = todayISO();
-  state[id] = s;
-  saveState();
-  renderDetail();
-}
-
-function skipObjective(id) {
-  const s = state[id] || {};
-  s.status = 'skipped';
-  state[id] = s;
-  saveState();
-  renderDetail();
-}
-
-function startObjective(id, endDate) {
-  state[id] = {
-    status: 'in-progress',
-    startDate: todayISO(),
-    endDate: endDate || null,
-  };
-  saveState();
-  renderDetail();
-}
-
-/* ---------- MODAL ---------- */
-
-const modalOverlay = document.getElementById('modalOverlay');
-const modalTitle = document.getElementById('modalTitle');
-const dateFields = document.getElementById('dateFields');
-const modalNote = document.getElementById('modalNote');
-const startDateInput = document.getElementById('startDateInput');
-const endDateInput = document.getElementById('endDateInput');
-const modalConfirm = document.getElementById('modalConfirm');
-const modalCancel = document.getElementById('modalCancel');
-
-let pendingObjId = null;
-let pendingIsSpecial = false;
-
-function openScheduleModal(obj, isSpecial) {
-  pendingObjId = obj.id;
-  pendingIsSpecial = isSpecial;
-  modalTitle.textContent = obj.name;
-  startDateInput.value = todayISO();
-
-  if (isSpecial) {
-    dateFields.style.display = 'none';
-    modalNote.style.display = 'block';
-    endDateInput.value = '';
-    endDateInput.required = false;
-  } else {
-    dateFields.style.display = 'flex';
-    modalNote.style.display = 'none';
-    endDateInput.min = todayISO();
-    endDateInput.value = '';
-  }
-  modalOverlay.classList.add('show');
-}
-
-function closeModal() {
-  modalOverlay.classList.remove('show');
-  pendingObjId = null;
-}
-
-modalCancel.addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', (e) => {
-  if (e.target === modalOverlay) closeModal();
-});
-
-modalConfirm.addEventListener('click', () => {
-  if (!pendingObjId) return;
-  if (!pendingIsSpecial && !endDateInput.value) {
-    endDateInput.focus();
-    return;
-  }
-  startObjective(pendingObjId, pendingIsSpecial ? null : endDateInput.value);
-  closeModal();
-});
-
-/* ---------- INIT ---------- */
-
+/* ============================================================
+   INIT
+   ============================================================ */
+loadState();
 renderHome();

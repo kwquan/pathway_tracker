@@ -10,10 +10,24 @@ A self-contained, mobile-first progress tracker for three learning pathways: Dat
 - **日本語**: the 聴解 reference items (Todaii News, Japanese Podcast, Waku Waku Drama, NHK News Transcribe) are no longer purely static — tap one to open a counter popup (0, with a `+`/`−` to log sessions), and the running total shows beside the icon.
 - Fixed the third 本 title to **妖怪怪談**.
 
+## File structure
+
+Kept the same layout as before — `index.html` is markup only, styles live in `style.css`, and all logic lives in `app.js`.
+
+```
+index.html
+style.css
+app.js
+manifest.json
+icon-192.png
+icon-512.png
+apple-touch-icon.png
+```
+
 ## Deploying to GitHub Pages
 
 1. Create a new GitHub repository (or use an existing one).
-2. Upload these files to the repo root: `index.html`, `manifest.json`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`.
+2. Upload all the files above to the repo root, replacing the existing ones.
 3. In the repo, go to **Settings → Pages**, set **Source** to your default branch (e.g. `main`) and folder `/ (root)`, then save.
 4. GitHub will give you a URL like `https://<username>.github.io/<repo>/` — that's your app.
 
@@ -29,7 +43,7 @@ Everything is stored locally in your browser via `localStorage` (key `pathways_t
 
 ## Editing objectives later
 
-All pathway/objective data lives in the `PATHWAYS` object near the top of the `<script>` block in `index.html`. Each group has:
+All pathway/objective data lives in the `PATHWAYS` object near the top of `app.js`. Each group has:
 - `sequential: true` → objectives unlock one after another (chain).
 - `sequential: false` → all objectives are available immediately (parallel).
 - `requiresDate: true` → starting an objective opens the date picker; `false` → it starts immediately as "IN PROGRESS".
