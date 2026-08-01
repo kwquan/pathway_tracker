@@ -48,6 +48,7 @@ h1,h2,h3,.display{
   margin:0 auto;
   min-height:100vh;
   min-height:100dvh;
+  padding-top:env(safe-area-inset-top);
   padding-bottom:48px;
   position:relative;
 }
@@ -168,7 +169,7 @@ h1,h2,h3,.display{
 
 /* ---------- Pathway Detail ---------- */
 .detail-header{
-  position:sticky; top:0; z-index:5;
+  position:sticky; top:env(safe-area-inset-top); z-index:5;
   background:linear-gradient(180deg, var(--bg) 70%, transparent);
   padding:16px 20px 14px;
   backdrop-filter:blur(6px);
@@ -180,7 +181,12 @@ h1,h2,h3,.display{
   cursor:pointer;
   background:none; border:none;
   font-family:'JetBrains Mono', monospace;
-  padding:6px 0;
+  padding:12px 10px 12px 0;
+  margin:-12px 0 -12px -4px;
+  min-height:44px;
+  -webkit-user-select:none;
+  user-select:none;
+  touch-action:manipulation;
 }
 .detail-title-row{
   display:flex; align-items:center; gap:12px;
